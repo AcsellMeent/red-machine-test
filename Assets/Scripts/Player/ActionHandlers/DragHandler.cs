@@ -14,6 +14,9 @@ namespace Player.ActionHandlers
         public event Action<Vector3> DragStartEvent;
         public event Action<Vector3> DragEndEvent;
 
+        public event Action<Vector3> NodeDragStartEvent;
+        public event Action<Vector3> NodeDragEndEvent;
+
         private ColorConnectionManager _colorConnectionManager;
 
         private void Start()
@@ -23,25 +26,34 @@ namespace Player.ActionHandlers
             ScenesChanger.SceneLoadedEvent += OnSceneLoaded;
         }
 
-        private void OnDestroy()
-        {
-            ScenesChanger.SceneLoadedEvent -= OnSceneLoaded;
-        }
+        // private void OnDestroy()
+        // {
+        //     ScenesChanger.SceneLoadedEvent -= OnSceneLoaded;
+        // }
 
         private void Update()
         {
             if (Input.GetMouseButtonDown(0))
             {
                 Vector3 position = CameraHolder.Instance.MainCamera.ScreenToWorldPoint(Input.mousePosition);
+                if (EventSystem.current.currentSelectedGameObject ?? false) return;
+
                 //Проверка на пустое пространство
-                if (!EventSystem.current.IsPointerOverGameObject() && !_colorConnectionManager.TryGetColorNodeInPosition(position, out var colorNode))
+                if (_colorConnectionManager.TryGetColorNodeInPosition(position, out var colorNode))
+                {
+                    NodeDragStartEvent?.Invoke(position);
+                }
+                else
                 {
                     DragStartEvent?.Invoke(position);
                 }
             }
             else if (Input.GetMouseButtonUp(0))
             {
-                DragEndEvent?.Invoke(CameraHolder.Instance.MainCamera.ScreenToWorldPoint(Input.mousePosition));
+                Vector3 position = CameraHolder.Instance.MainCamera.ScreenToWorldPoint(Input.mousePosition);
+
+                DragEndEvent?.Invoke(position);
+                NodeDragEndEvent?.Invoke(position);
             }
         }
 

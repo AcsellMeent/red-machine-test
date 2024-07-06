@@ -245,8 +245,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activityType: 1
   _startCameraPosition: {x: 0, y: 0, z: -10}
-  _horizontalPadding: 2
-  _verticalPadding: 2
+  _horizontalPadding: 1
+  _verticalPadding: 1
 --- !u!4 &869919207
 Transform:
   m_ObjectHideFlags: 0

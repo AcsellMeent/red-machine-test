@@ -11,6 +11,7 @@ namespace Camera
     public class CameraMovement : DontDestroyMonoBehaviour
     {
         private DragHandler _dragHandler;
+        private NearBounds _nearBounds;
         private Transform _cameraTransform;
         private Vector3 _startDragPosition;
 
@@ -21,9 +22,11 @@ namespace Camera
         private Vector3 _startCameraPosition;
 
         [SerializeField]
+        [Range(0, 10)]
         private float _horizontalPadding;
 
         [SerializeField]
+        [Range(0, 10)]
         private float _verticalPadding;
 
         private bool mouseDrag;
@@ -36,6 +39,10 @@ namespace Camera
             _dragHandler.DragStartEvent += OnDragStart;
             _dragHandler.DragEndEvent += OnDragEnd;
 
+            _nearBounds = NearBounds.Instance;
+
+            _nearBounds.ReachBounds += OnReachBounds;
+
             LevelBounds.Instance.ChangeLevelBounds += OnLevelBoundsChanged;
 
             ScenesChanger.SceneLoadedEvent += OnSceneLoaded;
@@ -46,6 +53,8 @@ namespace Camera
             _dragHandler.DragStartEvent -= OnDragStart;
             _dragHandler.DragEndEvent -= OnDragEnd;
 
+            _nearBounds.ReachBounds -= OnReachBounds;
+
             ScenesChanger.SceneLoadedEvent -= OnSceneLoaded;
         }
 
@@ -55,7 +64,7 @@ namespace Camera
             {
                 //Перемещение камеры при помощи перетаскивания
                 Vector3 delta = CameraHolder.Instance.MainCamera.ScreenToWorldPoint(Input.mousePosition) - _cameraTransform.position;
-                Vector3 cameraPosition = new Vector3(Mathf.Clamp((_startDragPosition - delta).x, minBound.x, maxBound.x), Mathf.Clamp((_startDragPosition - delta).y, minBound.y, maxBound.y), (_startDragPosition - delta).z);
+                Vector3 cameraPosition = ClampPosition(_startDragPosition - delta);
                 _cameraTransform.position = cameraPosition;
             }
         }
@@ -69,6 +78,16 @@ namespace Camera
         private void OnDragEnd(Vector3 position)
         {
             mouseDrag = false;
+        }
+
+        private void OnReachBounds(Vector2 direction)
+        {
+            _cameraTransform.position = ClampPosition(_cameraTransform.position + new Vector3(direction.x, direction.y, 0) * Time.deltaTime);
+        }
+
+        private Vector3 ClampPosition(Vector3 value)
+        {
+            return new Vector3(Mathf.Clamp(value.x, minBound.x, maxBound.x), Mathf.Clamp(value.y, minBound.y, maxBound.y), value.z);
         }
 
         private void OnLevelBoundsChanged(Vector2 min, Vector2 max)
