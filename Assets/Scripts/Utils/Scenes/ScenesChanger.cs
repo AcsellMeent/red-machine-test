@@ -49,13 +49,13 @@ namespace Utils.Scenes
         {
             _loadingSceneName = default;
             _changingStarted = false;
-            
+
             CurrentChangeOperation = null;
             IsLoading = false;
             
             SceneLoadedEvent?.Invoke();
         }
-        
+
         private static void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
